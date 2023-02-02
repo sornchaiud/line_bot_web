@@ -1,0 +1,24 @@
+h1 {
+    line-height: 1em;
+}
+
+.content{
+    height: 85vh;
+    background-color: lightblue;
+}
+.side-bar {
+    width: 20%;
+    height: 99%;
+    background-color: linen;
+    padding: 1px 10px;
+    margin: 2px;
+    float: left;
+}
+.message-body {
+    width: 76%;
+    height: 99%;
+    background-color: wheat;
+    padding: 1px 10px;
+    margin: 2px;
+    float: left;
+}

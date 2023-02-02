@@ -12,7 +12,7 @@ from pydantic import BaseModel
 
 router = APIRouter(
     prefix="/items",
-    tags=["chatbot"],
+    tags=["database"],
     responses={404: {"description": "Not found"}},
 )
 
@@ -27,11 +27,10 @@ default_app = firebase_admin.initialize_app(cred, {
     'databaseURL':os.getenv('databaseURL')
 })
 
-ref = db.reference("/Books")
-with open("books.json", "r") as f:
-    file_contents = json.load(f)
-ref.set(file_contents)
-
+# ref = db.reference("/Books")
+# with open("books.json", "r") as f:
+#     file_contents = json.load(f)
+# ref.set(file_contents)
 
 @router.get("/{item_id}")
 async def read_item(item_id: int, q: Union[str, None] = None):
