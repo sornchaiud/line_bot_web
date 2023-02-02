@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+pydantic 
+
+line-bot-sdk
+
+firebase-admin
