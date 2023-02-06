@@ -18,20 +18,22 @@ from routers import database, webhooks
 
 templates = Jinja2Templates(directory="_templates")
 
+def datetime_format(value, format="%H:%M %d-%m-%y"):
+    return value.strftime(format)
+templates.env.filters["datetime_format"] = datetime_format
+
 app = FastAPI()
 app.include_router(database.router)
 app.include_router(webhooks.router)
 
 app.mount("/static", StaticFiles(directory="_statics"), name="static")
 
+
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
-    default_app = database.default_app
-    users = db.reference("/users").get()
-    messages = db.reference("/users/Ud1500fd6dceff152f5e6d90080de2720/messages").get()
-
+    users, messages = await webhooks.load_users()
     return templates.TemplateResponse("index.html", {
-        "request": request, 
+        "request": request,
         "users": users,
         "messages": messages
     })

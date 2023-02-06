@@ -17,16 +17,18 @@
             <h3>Friend</h3>
             {% for user in users %}
                 <div>
-                    {{user.name}}
+                    <img src="{{user.picture_url}}" alt="" width="20%">
+                    {{user.display_name}}
                 </div>
             {% endfor %}
         </div>
         <div class="message-body">
             <h3>message</h3>
-            {% for key in messages %}
-                <div>
-                    {{messages[key].text}}
-                </div>
+            {% for message in messages %}
+                <p style="padding-left: 3em; text-indent: -3em;">
+                    <strong>{{ message.user_name }}</strong> <span class="time">{{ message.timestamp | datetime_format('%d %B %Y') }}</span> <br>
+                    {{ message.text }}
+                </p>
             {% endfor %}
         </div>
     </div>

@@ -3,7 +3,6 @@ import os
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
-import json
 
 from fastapi import status, APIRouter, HTTPException, Header, Request
 
@@ -19,18 +18,17 @@ router = APIRouter(
 class Item(BaseModel):
     id: int
     name: str
-    price: Union[float, None] = None
-    is_offer: Union[bool, None] = None
+    price: float | None = None
+    is_offer: bool | None = None
+
+class Users(BaseModel):
+    id: str
+    messages: list | None
 
 cred = credentials.Certificate(os.getenv('FIREBASE_KEY'))
 default_app = firebase_admin.initialize_app(cred, {
     'databaseURL':os.getenv('databaseURL')
 })
-
-# ref = db.reference("/Books")
-# with open("books.json", "r") as f:
-#     file_contents = json.load(f)
-# ref.set(file_contents)
 
 @router.get("/{item_id}")
 async def read_item(item_id: int, q: Union[str, None] = None):
