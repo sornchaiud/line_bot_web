@@ -1,5 +1,4 @@
 firebase-admin
-dotenv
 line-bot-sdk
 fastapi
 uvicorn[standard]
