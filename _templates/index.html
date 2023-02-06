@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,6 +9,7 @@
 
     <link rel="stylesheet" href="/static/style.css">
 </head>
+
 <body>
     <h1 class="title">
         Line-bot with Firebase
@@ -16,21 +18,76 @@
         <div class="side-bar">
             <h3>Friend</h3>
             {% for user in users %}
-                <div>
-                    <img src="{{user.picture_url}}" alt="" width="20%">
-                    {{user.display_name}}
-                </div>
+            <div>
+                <img src="{{user.picture_url}}" alt="" width="20%">
+                {{user.display_name}}
+            </div>
             {% endfor %}
         </div>
+
         <div class="message-body">
             <h3>message</h3>
             {% for message in messages %}
-                <p style="padding-left: 3em; text-indent: -3em;">
-                    <strong>{{ message.user_name }}</strong> <span class="time">{{ message.timestamp | datetime_format('%d %B %Y') }}</span> <br>
-                    {{ message.text }}
-                </p>
+            <p style="padding-left: 3em; text-indent: -3em;">
+                <strong>{{ message.user_name }}</strong> <span class="time">{{ message.timestamp | datetime_format('%d
+                    %B %Y') }}</span> <br>
+                {{ message.text }}
+            </p>
             {% endfor %}
+
+            <form class="reply" id="reply_form" method="POST" action="/line/reply">
+                <fieldset>
+                    <select name="reply_to" id="reply_to">
+                        <option value="all">all</option>
+                        {% for user in users %}
+                        <option value="{{user.user_id}}">{{user.display_name}}</option>
+                        {% endfor %}
+                    </select>
+                    <textarea name="reply_message" id="reply_message" rows="3"></textarea>
+                    <button type="button" onclick="send_message()">ส่ง</button>
+                </fieldset>
+            </form>
+
+
         </div>
     </div>
 </body>
+
+
+<script>
+
+    send_message = () => {
+
+        event.preventDefault();
+
+        var reply_to = document.querySelector("#reply_to");
+        var reply_message = document.querySelector("#reply_message");
+
+        var data = {
+            'reply_to': reply_to.value,
+            'reply_message': reply_message.value,
+        }
+
+
+        fetch('/line/reply', {
+            method: "post",
+            headers: { 'accept': 'application/json', "Content-Type": "application/json" },
+            
+            body: JSON.stringify( data )
+
+        }).then( (reponse) => {
+            console.log( reponse )
+            return reponse.json()
+        }).then( (data) => {
+            console.log( data )
+            reply_to.value = ''
+            reply_message.value = ''
+        }).catch( error => {
+            console.error( error )
+        })
+
+        console.log(data);
+    }
+</script>
+
 </html>

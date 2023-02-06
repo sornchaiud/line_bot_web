@@ -35,6 +35,18 @@ class Line(BaseModel):
     events: list[Optional[None]]
 
 
+class Message(BaseModel):
+    user_name: str
+    text: str
+    timestamp: datetime | None
+
+
+class ReplyMessage(BaseModel):
+    reply_to: str
+    reply_message: str
+    is_success: bool | None = None
+
+
 @router.post("/")
 async def callback(request: Request, x_line_signature: str = Header(None)):
     body = await request.body()
@@ -53,23 +65,17 @@ def message_text(event):
     print(event)
     print(event.source)
 
-    user_id = db.reference(f'users/{event.source.user_id}/messages')
-    user_id.push({
-        "text": event.message.text,
-        "timestamp":  event.timestamp
-    })
-
     print("!!!!!!!!!!!!!!!!!!!!!!")
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=event.message.text)
     )
-
-
-class Message(BaseModel):
-    user_name: str
-    text: str
-    timestamp: datetime | None
+    
+    user_id = db.reference(f'users/{event.source.user_id}/messages')
+    user_id.push({
+        "text": event.message.text,
+        "timestamp":  event.timestamp
+    })
 
 
 async def load_users():
@@ -78,19 +84,50 @@ async def load_users():
 
     messages = []
     for user_id, value in ref_users.items():
-        profile = line_bot_api.get_profile(user_id)
-        users.append(profile)
+        try:
+            profile = line_bot_api.get_profile(user_id)
+            users.append(profile)
 
-        for key in value['messages']:
-            ts = datetime.fromtimestamp(
-                value['messages'][key]['timestamp']/1000.0
-            )
+            for key in value['messages']:
+                ts = datetime.fromtimestamp(
+                    value['messages'][key]['timestamp']/1000.0
+                )
 
-            m = Message(
-                text=value['messages'][key]['text'],
-                timestamp=ts,
-                user_name=profile.display_name
-            )
-            messages.append(m)
+                m = Message(
+                    text=value['messages'][key]['text'],
+                    timestamp=ts,
+                    user_name=profile.display_name
+                )
+                messages.append(m)
+        except:
+            print( user_id )
+            print( "some thing worng" )
 
     return users, messages
+
+
+@router.post('/reply')
+# async def reply_message(request: Request):
+#     print( await request.body() )
+async def reply_message(message: ReplyMessage):
+    print(message)
+
+    if message.reply_to == 'all':
+        line_bot_api.broadcast(
+            TextMessage(text=message.reply_message)
+        )
+    else:
+        line_bot_api.push_message(
+            message.reply_to,
+            TextSendMessage(text=message.reply_message)
+        )
+
+    
+    user_id = db.reference(f'users/1657841142/messages')
+    user_id.push({
+        "text": message.reply_message
+        # "timestamp":  datetime.now()
+    })
+
+    message.is_success = True
+    return message
